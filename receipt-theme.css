@@ -1,11 +1,11 @@
 .receipt-card {
   background-color: #fff6df;
   background-image:
-    linear-gradient(90deg, rgba(255, 250, 239, .96) 0%, rgba(255, 249, 234, .91) 52%, rgba(255, 247, 229, .35) 100%),
+    linear-gradient(90deg, rgba(255, 250, 239, .96) 0%, rgba(255, 249, 234, .91) 58%, rgba(255, 247, 229, .08) 100%),
     url('durga-receipt-background.png');
   background-position: center, right center;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: 100% 100%, auto 100%;
   border: 2px solid #d69d2f;
   box-shadow: inset 0 0 0 5px #fff3d6, 0 9px 20px #7d351420;
 }
@@ -15,5 +15,6 @@
 .receipt-card .receipt-body p, .receipt-card .receipt-footer { text-shadow: 0 1px #fff9e9; }
 .record-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 9px; }
 .record-actions[hidden], .share-actions[hidden], .link-note[hidden] { display: none; }
+.more-actions { margin-left: auto; border: 1px solid #dfd2c5; border-radius: 9px; background: #fffaf0; color: #8b1620; font-size: 20px; line-height: 1; padding: 5px 10px; cursor: pointer; }
 .edit { background: #fff2d9; color: #895400; border-color: #f1d49e; }
 .delete { background: #fff0f0; color: #9c1f29; border-color: #efc6c9; }
