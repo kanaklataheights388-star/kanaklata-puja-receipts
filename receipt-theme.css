@@ -20,7 +20,18 @@
   font: 15px Georgia, serif;
   letter-spacing: 8px;
   opacity: .85;
+  z-index: 1;
 }
+.receipt-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, #fff6dfee 20%, #fff6df55 54%, #fff6df08 100%), url('community-puja-moment.jpg') center bottom / 90% auto no-repeat;
+  opacity: .4;
+  pointer-events: none;
+  z-index: 0;
+}
+.receipt-card .receipt-top, .receipt-card .receipt-body, .receipt-card .receipt-footer { z-index: 1; }
 .receipt-card .receipt-top { padding-top: 17px; }
 .receipt-card .eyebrow {
   color: #9c291e;

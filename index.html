@@ -6,8 +6,8 @@
     <meta name="theme-color" content="#8b1620" />
     <meta name="description" content="Kanaklata Heights Durga Puja donation receipts" />
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=2" />
-    <link rel="stylesheet" href="receipt-theme.css?v=2" />
+    <link rel="stylesheet" href="styles.css?v=3" />
+    <link rel="stylesheet" href="receipt-theme.css?v=3" />
     <title>Puja Receipts · Kanaklata Heights</title>
   </head>
   <body>
@@ -53,7 +53,6 @@
           <label>Amount (₹)<input required id="donationAmount" name="amount" inputmode="decimal" type="number" min="1" placeholder="0" /></label>
           <label>Payment mode<select id="paymentMode" name="paymentMode"><option>UPI</option><option>Cash</option><option>Bank transfer</option><option>Cheque</option></select></label>
         </div>
-        <label>Mobile number <span class="optional">optional</span><input id="donorPhone" name="phone" inputmode="tel" type="tel" placeholder="10-digit WhatsApp / SMS number" /></label>
         <label>Purpose<select id="purpose" name="purpose"><option>Durga Puja subscription</option><option>Durga Puja donation</option><option>Bhog contribution</option><option>Other contribution</option></select></label>
         <label>Notes <span class="optional">optional</span><textarea id="notes" name="notes" placeholder="Flat number or a short note"></textarea></label>
         <button class="primary large" type="submit">Generate receipt</button>
@@ -66,9 +65,7 @@
       <div id="receiptCard" class="receipt-card"></div>
       <div class="share-actions">
         <button class="action image-share" id="imageShareButton">▧ Receipt image</button>
-        <button class="action whatsapp" id="whatsappButton">◉ WhatsApp</button>
         <button class="action" id="nativeShareButton">↗ Share</button>
-        <button class="action" id="printButton">▣ Print / PDF</button>
       </div>
       <div class="record-actions" id="recordActions">
         <button class="action edit" id="editButton">✎ Edit / adjust</button>
@@ -91,6 +88,6 @@
       </div>
       <p class="link-note">Keep a backup in Google Drive or Files whenever you add receipts. This app stays free and works with one cashier phone.</p>
     </dialog>
-    <script src="app.js?v=2"></script>
+    <script src="app.js?v=3"></script>
   </body>
 </html>
