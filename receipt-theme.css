@@ -12,10 +12,10 @@
   position: absolute;
   inset: 0;
   background: url('community-puja-moment.jpg') center bottom / 110% auto no-repeat;
-  opacity: .36;
-  filter: sepia(.16) saturate(.82) brightness(1.11);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.25) 38%, #000 72%, rgba(0,0,0,.76) 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.25) 38%, #000 72%, rgba(0,0,0,.76) 100%);
+  opacity: .46;
+  filter: sepia(.12) saturate(.92) brightness(1.03);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.3) 38%, #000 72%, rgba(0,0,0,.85) 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.3) 38%, #000 72%, rgba(0,0,0,.85) 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -23,7 +23,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: url('durga-receipt-background.png') right center / auto 118% no-repeat;
+  background: url('durga-receipt-background.png') right 16px center / auto 118% no-repeat;
   opacity: .36;
   filter: sepia(.12) saturate(.84) brightness(1.08);
   -webkit-mask-image: radial-gradient(ellipse 88% 88% at 100% 43%, #000 23%, rgba(0,0,0,.88) 55%, transparent 90%);
