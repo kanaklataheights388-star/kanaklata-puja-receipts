@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#8b1620" />
+    <meta name="description" content="Kanaklata Heights Durga Puja donation receipts" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>Puja Receipts · Kanaklata Heights</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div class="brand-mark">ॐ</div>
+        <div><p class="eyebrow">KANAKLATA HEIGHTS</p><h1>Puja Receipts</h1></div>
+        <button class="icon-button" id="settingsButton" aria-label="Settings">⚙</button>
+      </header>
+
+      <section class="hero" id="homePanel">
+        <div class="hero-art"><span>🪔</span></div>
+        <p class="eyebrow">SHARODOTSAV 2026</p>
+        <h2>Every contribution,<br><em>gratefully received.</em></h2>
+        <p>Digital donation receipts for Kanaklata Heights Residents, Narendrapur, Kolkata – 700103.</p>
+        <button class="primary large" id="newReceiptButton">＋ Create a receipt</button>
+      </section>
+
+      <section class="summary-grid" aria-label="Collection summary">
+        <article><span>Collected</span><strong id="totalCollected">₹0</strong><small>This season</small></article>
+        <article><span>Receipts</span><strong id="receiptCount">0</strong><small>Generated</small></article>
+        <article><span>Latest no.</span><strong id="latestNumber">—</strong><small>Receipt number</small></article>
+      </section>
+
+      <section class="records-section">
+        <div class="section-heading"><div><p class="eyebrow">RECORDS</p><h2>Recent receipts</h2></div><button class="text-button" id="viewAllButton">View all</button></div>
+        <div id="recentReceipts" class="receipt-list"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="nav-item active" data-view="home"><span>⌂</span>Home</button>
+      <button class="nav-item" data-view="records"><span>▤</span>Receipts</button>
+      <button class="nav-item" data-view="new"><span>⊕</span>New</button>
+    </nav>
+
+    <dialog id="receiptDialog" class="sheet">
+      <form method="dialog" id="receiptForm">
+        <div class="sheet-handle"></div>
+        <div class="sheet-heading"><div><p class="eyebrow">NEW CONTRIBUTION</p><h2>Create receipt</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div>
+        <label>Donor name<input required id="donorName" name="name" placeholder="e.g. Ananya Banerjee" autocomplete="name" /></label>
+        <div class="two-column">
+          <label>Amount (₹)<input required id="donationAmount" name="amount" inputmode="decimal" type="number" min="1" placeholder="0" /></label>
+          <label>Payment mode<select id="paymentMode" name="paymentMode"><option>UPI</option><option>Cash</option><option>Bank transfer</option><option>Cheque</option></select></label>
+        </div>
+        <label>Mobile number <span class="optional">optional</span><input id="donorPhone" name="phone" inputmode="tel" type="tel" placeholder="10-digit WhatsApp / SMS number" /></label>
+        <label>Purpose<select id="purpose" name="purpose"><option>Durga Puja subscription</option><option>Durga Puja donation</option><option>Bhog contribution</option><option>Other contribution</option></select></label>
+        <label>Notes <span class="optional">optional</span><textarea id="notes" name="notes" placeholder="Flat number or a short note"></textarea></label>
+        <button class="primary large" type="submit">Generate receipt</button>
+      </form>
+    </dialog>
+
+    <dialog id="detailDialog" class="sheet detail-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-heading"><div><p class="eyebrow">DIGITAL RECEIPT</p><h2 id="detailTitle">Receipt</h2></div><button class="close" id="closeDetail" aria-label="Close">×</button></div>
+      <div id="receiptCard" class="receipt-card"></div>
+      <div class="share-actions">
+        <button class="action image-share" id="imageShareButton">▧ Receipt image</button>
+        <button class="action whatsapp" id="whatsappButton">◉ WhatsApp</button>
+        <button class="action sms" id="smsButton">✉ SMS</button>
+        <button class="action" id="nativeShareButton">↗ Share</button>
+        <button class="action" id="printButton">▣ Print / PDF</button>
+      </div>
+      <p class="link-note" id="receiptLinkNote"></p>
+    </dialog>
+
+    <dialog id="settingsDialog" class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-heading"><div><p class="eyebrow">SETTINGS</p><h2>Committee details</h2></div><button class="close" id="closeSettings" aria-label="Close">×</button></div>
+      <label>Collection year<input id="settingYear" inputmode="numeric" maxlength="4" /></label>
+      <label>Collector name<input id="settingCollector" placeholder="e.g. Puja Committee" /></label>
+      <label>Secretary name<input id="settingSecretary" placeholder="e.g. Committee Secretary" /></label>
+      <button class="primary large" id="saveSettings">Save details</button>
+      <div class="backup-actions">
+        <button type="button" class="action" id="exportButton">⇩ Back up records</button>
+        <button type="button" class="action" id="importButton">⇧ Restore backup</button>
+        <input id="importFile" type="file" accept="application/json" hidden />
+      </div>
+      <p class="link-note">Keep a backup in Google Drive or Files whenever you add receipts. This app stays free and works with one cashier phone.</p>
+    </dialog>
+    <script src="app.js"></script>
+  </body>
+</html>
