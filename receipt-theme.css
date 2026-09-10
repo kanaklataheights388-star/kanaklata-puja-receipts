@@ -11,6 +11,60 @@
 .receipt-card .receipt-body { border-color: #bd8729; }
 .receipt-card .receipt-footer { border-top: 1px solid #bd8729; padding-top: 9px; }
 .receipt-card .receipt-body p, .receipt-card .receipt-footer { text-shadow: 0 1px #fff9e9; }
+.receipt-card::before {
+  content: '✦  ✦  ✦';
+  position: absolute;
+  top: 9px;
+  left: 19px;
+  color: #c98a19;
+  font: 15px Georgia, serif;
+  letter-spacing: 8px;
+  opacity: .85;
+}
+.receipt-card .receipt-top { padding-top: 17px; }
+.receipt-card .eyebrow {
+  color: #9c291e;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 11px;
+  letter-spacing: 2.2px;
+}
+.receipt-card .receipt-top h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 29px;
+  font-style: italic;
+  letter-spacing: -.7px;
+  line-height: 1;
+}
+.receipt-card .receipt-no {
+  color: #9a211c;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  letter-spacing: .4px;
+}
+.receipt-card .receipt-body p { font-size: 14px; line-height: 1.35; }
+.receipt-card .receipt-body p:first-child::first-letter {
+  color: #9c291e;
+  font: 31px/18px Georgia, serif;
+}
+.receipt-card .amount-words {
+  color: #8b1620;
+  font: italic 16px/1.4 Georgia, 'Times New Roman', serif;
+  letter-spacing: .2px;
+  margin-top: 11px;
+}
+.receipt-card .receipt-body > b {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 12px 4px;
+  color: #fff8e8;
+  background: linear-gradient(90deg, #146043, #237b52);
+  border-radius: 999px;
+  box-shadow: 0 2px 0 #0e4832;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 27px;
+  letter-spacing: .5px;
+}
+.receipt-card .receipt-footer { font-family: Georgia, 'Times New Roman', serif; font-size: 11px; }
 .record-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 9px; }
 .record-actions[hidden], .share-actions[hidden], .link-note[hidden] { display: none; }
 .more-actions { margin-left: auto; border: 1px solid #dfd2c5; border-radius: 9px; background: #fffaf0; color: #8b1620; font-size: 20px; line-height: 1; padding: 5px 10px; cursor: pointer; }
