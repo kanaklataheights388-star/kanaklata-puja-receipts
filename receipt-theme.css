@@ -4,7 +4,8 @@
   box-shadow: inset 0 0 0 5px #fff3d6, 0 9px 20px #7d351420;
 }
 .receipt-card .receipt-top h3 { color: #8b1620; text-shadow: 0 1px #fff5db; }
-.receipt-card .receipt-body { border-color: #bd872980; }
+.receipt-card .receipt-body { border-color: #bd872980; border-top: 0; padding-top: 16px; }
+.receipt-card .receipt-body::before { content: ''; position: absolute; top: 0; left: 0; width: 68%; border-top: 1px dashed #bd8729; -webkit-mask-image: linear-gradient(to right, #000 0 78%, transparent 100%); mask-image: linear-gradient(to right, #000 0 78%, transparent 100%); }
 .receipt-card .receipt-footer { border-top: 1px solid #bd8729; padding-top: 9px; }
 .receipt-card .receipt-body p, .receipt-card .receipt-footer { text-shadow: 0 1px #fff9e9; }
 .receipt-card::before {
