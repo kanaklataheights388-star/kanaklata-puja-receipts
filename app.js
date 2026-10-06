@@ -4,6 +4,7 @@ let receipts = JSON.parse(localStorage.getItem(KEY) || '[]');
 let settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{"year":"2026","collector":"Puja Committee","secretary":"Secretary, Kanaklata Heights Residents Durga Puja Committee"}');
 let currentReceipt = null;
 let editingId = null;
+let showingAllReceipts = false;
 const $ = id => document.getElementById(id);
 const money = n => '₹' + Number(n).toLocaleString('en-IN');
 const dateText = iso => new Intl.DateTimeFormat('en-IN',{day:'numeric',month:'short',year:'numeric'}).format(new Date(iso));
@@ -12,7 +13,12 @@ function renderList(){
   const total = receipts.reduce((sum,r)=>sum+Number(r.amount),0);
   $('totalCollected').textContent=money(total); $('receiptCount').textContent=receipts.length;
   $('latestNumber').textContent=receipts.length ? receipts[0].number : '—';
-  $('recentReceipts').innerHTML=receipts.length ? receipts.slice(0,5).map(r=>`<button class="list-item" data-id="${r.id}"><span class="initial">${r.name.trim()[0].toUpperCase()}</span><span><b>${esc(r.name)}</b><small>${r.number} · ${dateText(r.date)} · ${esc(r.paymentMode)}</small></span><strong>${money(r.amount)}</strong></button>`).join('') : '<div class="empty">No receipts yet. Your generated receipts will be securely saved on this device.</div>';
+  const visibleReceipts=showingAllReceipts ? receipts : receipts.slice(0,5);
+  $('recordsHeading').textContent=showingAllReceipts ? 'All receipts' : 'Recent receipts';
+  $('viewAllButton').hidden=receipts.length<=5;
+  $('viewAllButton').textContent=showingAllReceipts ? 'Show recent' : `View all (${receipts.length})`;
+  $('viewAllButton').setAttribute('aria-expanded',String(showingAllReceipts));
+  $('recentReceipts').innerHTML=receipts.length ? visibleReceipts.map(r=>`<button class="list-item" data-id="${r.id}"><span class="initial">${r.name.trim()[0].toUpperCase()}</span><span><b>${esc(r.name)}</b><small>${r.number} · ${dateText(r.date)} · ${esc(r.paymentMode)}</small></span><strong>${money(r.amount)}</strong></button>`).join('') : '<div class="empty">No receipts yet. Your generated receipts will be securely saved on this device.</div>';
   document.querySelectorAll('.list-item').forEach(el=>el.onclick=()=>showReceipt(receipts.find(r=>r.id===el.dataset.id)));
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -46,6 +52,6 @@ $('settingsButton').onclick=()=>{$('settingYear').value=settings.year;$('setting
 $('closeSettings').onclick=()=>$('settingsDialog').close();$('saveSettings').onclick=()=>{settings={year:$('settingYear').value||'2026',collector:$('settingCollector').value||'Puja Committee',secretary:$('settingSecretary').value||'Secretary'};localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));$('settingsDialog').close();};
 $('exportButton').onclick=()=>{const data=JSON.stringify({exportedAt:new Date().toISOString(),settings,receipts},null,2),file=new Blob([data],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=`kanaklata-puja-backup-${settings.year}.json`;a.click();URL.revokeObjectURL(a.href)};
 $('importButton').onclick=()=>$('importFile').click();$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.receipts))throw new Error();if(!confirm(`Restore ${data.receipts.length} receipts from this backup? This replaces current records.`))return;receipts=data.receipts;settings=data.settings||settings;save();localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));renderList();$('settingsDialog').close();alert('Backup restored successfully.')}catch{alert('That backup file is not valid.')}finally{e.target.value=''}};
-$('viewAllButton').onclick=()=>{document.querySelector('.records-section').scrollIntoView({behavior:'smooth'});};document.querySelector('[data-view="records"]').onclick=()=>document.querySelector('.records-section').scrollIntoView({behavior:'smooth'});document.querySelector('[data-view="home"]').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+$('viewAllButton').onclick=()=>{showingAllReceipts=!showingAllReceipts;renderList();document.querySelector('.records-section').scrollIntoView({behavior:'smooth'});};document.querySelector('[data-view="records"]').onclick=()=>{showingAllReceipts=true;renderList();document.querySelector('.records-section').scrollIntoView({behavior:'smooth'});};document.querySelector('[data-view="home"]').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 const sharedPayload=new URLSearchParams(location.search).get('receipt')||new URLSearchParams(location.hash.slice(1)).get('receipt');if(sharedPayload){const shared=decodeReceipt(sharedPayload);if(shared)setTimeout(()=>showReceipt(shared),150)}
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw-v2.js'); renderList();
