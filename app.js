@@ -21,6 +21,100 @@ function renderList(){
   $('recentReceipts').innerHTML=receipts.length ? visibleReceipts.map(r=>`<button class="list-item" data-id="${r.id}"><span class="initial">${r.name.trim()[0].toUpperCase()}</span><span><b>${esc(r.name)}</b><small>${r.number} · ${dateText(r.date)} · ${esc(r.paymentMode)}</small></span><strong>${money(r.amount)}</strong></button>`).join('') : '<div class="empty">No receipts yet. Your generated receipts will be securely saved on this device.</div>';
   document.querySelectorAll('.list-item').forEach(el=>el.onclick=()=>showReceipt(receipts.find(r=>r.id===el.dataset.id)));
 }
+
+function renderReport(){
+  const ordered=[...receipts].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const total=ordered.reduce((sum,r)=>sum+Number(r.amount||0),0);
+  const contributors=new Set(ordered.map(r=>(r.name||'').trim().toLowerCase()).filter(Boolean)).size;
+  $('reportYear').textContent=settings.year;
+  $('reportSummary').innerHTML=`<article><span>Total collected</span><strong>${money(total)}</strong></article><article><span>Receipts</span><strong>${ordered.length}</strong></article><article><span>Contributors</span><strong>${contributors}</strong></article>`;
+  $('reportRows').innerHTML=ordered.length ? ordered.map(r=>`<tr><td>${esc(r.number)}</td><td>${dateText(r.date)}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.purpose)}<small>${esc(r.paymentMode)}${r.notes ? ` · ${esc(r.notes)}` : ''}</small></td><td>${money(r.amount)}</td></tr>`).join('') : '<tr><td colspan="5" class="report-empty">No receipt records have been saved yet.</td></tr>';
+}
+
+function reportCsvCell(value){
+  return `"${String(value??'').replace(/"/g,'""')}"`;
+}
+
+function downloadReport(){
+  const ordered=[...receipts].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const rows=[
+    ['Receipt number','Payment date','Contributor name','Amount','Payment mode','Purpose','Notes','Collector'],
+    ...ordered.map(r=>[r.number,dateText(r.date),r.name,r.amount,r.paymentMode,r.purpose,r.notes||'',r.collector||settings.collector||''])
+  ];
+  const blob=new Blob(['\ufeff'+rows.map(row=>row.map(reportCsvCell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=`kanaklata-puja-contribution-report-${settings.year}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function pdfText(value,limit=0){
+  const text=String(value??'').replace(/[^\x20-\x7E]/g,'?');
+  const shortened=limit ? text.slice(0,limit) : text;
+  return shortened.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
+}
+
+function downloadReportPdf(){
+  const ordered=[...receipts].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const total=ordered.reduce((sum,r)=>sum+Number(r.amount||0),0);
+  const pages=[];
+  for(let index=0;index<ordered.length||(!ordered.length&&index===0);index+=14) pages.push(ordered.slice(index,index+14));
+  const pageObjects=pages.map((_,index)=>4+(index*2));
+  const objects=[
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    `<< /Type /Pages /Kids [${pageObjects.map(number=>`${number} 0 R`).join(' ')}] /Count ${pages.length} >>`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'
+  ];
+  const generated=dateText(new Date().toISOString());
+  pages.forEach((page,pageIndex)=>{
+    const line=(text,x,y,size=10,color='0.22 0.16 0.12')=>`BT /F1 ${size} Tf ${color} rg ${x} ${y} Td (${pdfText(text)}) Tj ET`;
+    const content=[
+      '0.99 0.96 0.89 rg 0 0 842 595 re f',
+      '0.55 0.09 0.14 rg 28 552 786 3 re f',
+      line('KANAKLATA HEIGHTS',32,520,22,'0.55 0.09 0.14'),
+      line(`Sharodotsav ${settings.year} contribution report`,34,496,12,'0.08 0.39 0.27'),
+      line(`Generated: ${generated}     |     Total collected: Rs. ${Number(total).toLocaleString('en-IN')}     |     Receipts: ${ordered.length}`,34,476,9),
+      '0.55 0.09 0.14 rg 32 450 778 18 re f',
+      line('RECEIPT / DATE',38,456,8,'1 1 1'),
+      line('CONTRIBUTOR AND CONTRIBUTION DETAILS',230,456,8,'1 1 1'),
+      line('AMOUNT',716,456,8,'1 1 1')
+    ];
+    if(!page.length) content.push(line('No receipt records have been saved yet.',38,420,11));
+    page.forEach((receipt,rowIndex)=>{
+      const y=426-(rowIndex*27);
+      if(rowIndex%2===0) content.push(`0.96 0.92 0.84 rg 32 ${y-17} 778 25 re f`);
+      content.push(line(`${receipt.number}  |  ${dateText(receipt.date)}`,38,y,9));
+      content.push(line(`${receipt.name||''}`,230,y,10,'0.08 0.39 0.27'));
+      content.push(line(`Rs. ${Number(receipt.amount||0).toLocaleString('en-IN')}`,716,y,9,'0.08 0.39 0.27'));
+      content.push(line(`Payment: ${receipt.paymentMode||''}  |  ${receipt.purpose||''}${receipt.notes ? `  |  ${receipt.notes}` : ''}`,230,y-12,8));
+    });
+    content.push(line(`Page ${pageIndex+1} of ${pages.length}`,724,26,8,'0.45 0.35 0.27'));
+    const stream=content.join('\n');
+    const pageObject=4+(pageIndex*2);
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 3 0 R >> >> /Contents ${pageObject+1} 0 R >>`);
+    objects.push(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
+  });
+  let pdf='%PDF-1.4\n%----\n';
+  const offsets=[0];
+  objects.forEach((object,index)=>{offsets.push(pdf.length);pdf+=`${index+1} 0 obj\n${object}\nendobj\n`;});
+  const xref=pdf.length;
+  pdf+=`xref\n0 ${objects.length+1}\n0000000000 65535 f \n`;
+  offsets.slice(1).forEach(offset=>{pdf+=`${String(offset).padStart(10,'0')} 00000 n \n`;});
+  pdf+=`trailer\n<< /Size ${objects.length+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  const blob=new Blob([pdf],{type:'application/pdf'});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');
+  link.href=url;
+  link.download=`kanaklata-puja-contribution-report-${settings.year}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function words(n){
   const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen']; const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
@@ -55,3 +149,9 @@ $('importButton').onclick=()=>$('importFile').click();$('importFile').onchange=a
 $('viewAllButton').onclick=()=>{showingAllReceipts=!showingAllReceipts;renderList();document.querySelector('.records-section').scrollIntoView({behavior:'smooth'});};document.querySelector('[data-view="records"]').onclick=()=>{showingAllReceipts=true;renderList();document.querySelector('.records-section').scrollIntoView({behavior:'smooth'});};document.querySelector('[data-view="home"]').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 const sharedPayload=new URLSearchParams(location.search).get('receipt')||new URLSearchParams(location.hash.slice(1)).get('receipt');if(sharedPayload){const shared=decodeReceipt(sharedPayload);if(shared)setTimeout(()=>showReceipt(shared),150)}
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw-v2.js'); renderList();
+
+$('reportButton').onclick=()=>{renderReport();$('reportDialog').showModal();};
+$('closeReport').onclick=()=>$('reportDialog').close();
+$('reportDialog').addEventListener('click',event=>{if(event.target===$('reportDialog'))$('reportDialog').close();});
+$('downloadReportButton').onclick=downloadReport;
+$('downloadReportPdfButton').onclick=downloadReportPdf;

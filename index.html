@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#8b1620" />
     <meta name="description" content="Kanaklata Heights Durga Puja donation receipts" />
     <link rel="manifest" href="manifest.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=7" />
     <link rel="stylesheet" href="receipt-theme.css?v=6" />
     <title>Puja Receipts · Kanaklata Heights</title>
   </head>
@@ -33,7 +33,7 @@
       </section>
 
       <section class="records-section">
-        <div class="section-heading"><div><p class="eyebrow">RECORDS</p><h2 id="recordsHeading">Recent receipts</h2></div><button class="text-button" id="viewAllButton" aria-expanded="false">View all</button></div>
+    <div class="section-heading"><div><p class="eyebrow">RECORDS</p><h2 id="recordsHeading">Recent receipts</h2></div><div class="section-actions"><button class="text-button" id="reportButton">Report</button><button class="text-button" id="viewAllButton" aria-expanded="false">View all</button></div></div>
         <div id="recentReceipts" class="receipt-list"></div>
       </section>
     </main>
@@ -88,6 +88,41 @@
       </div>
       <p class="link-note">Keep a backup in Google Drive or Files whenever you add receipts. This app stays free and works with one cashier phone.</p>
     </dialog>
-    <script src="app.js?v=8"></script>
+<style>
+  .section-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+  .report-sheet{width:min(760px,calc(100% - 24px));max-height:min(760px,calc(100% - 24px));padding:22px;overflow:hidden}
+  .report-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
+  .report-summary article{padding:13px 12px;border:1px solid #ead7ae;border-radius:14px;background:#fffaf0}
+  .report-summary span{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7a6454}
+  .report-summary strong{display:block;margin-top:5px;font-size:18px;color:#126747}
+  .report-table-wrap{max-height:46vh;overflow:auto;border:1px solid #ead7ae;border-radius:14px;background:#fffdfa}
+  .report-table{width:100%;min-width:650px;border-collapse:collapse;text-align:left;font-size:13px}
+  .report-table th{position:sticky;top:0;padding:11px 12px;background:#8d1723;color:#fff8e9;font-size:11px;letter-spacing:.06em;text-transform:uppercase;z-index:1}
+  .report-table td{padding:12px;border-top:1px solid #f0e3c8;vertical-align:top;color:#473a31}
+  .report-table td:last-child{text-align:right;font-weight:800;color:#126747;white-space:nowrap}
+  .report-table td small{display:block;margin-top:3px;color:#7a6454;line-height:1.35}
+  .report-empty{text-align:center!important;padding:28px!important;color:#7a6454!important}
+  .report-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+  .report-actions .primary{width:100%}
+  @media(max-width:520px){.report-sheet{padding:18px 14px}.report-summary{gap:6px}.report-summary article{padding:10px 8px}.report-summary strong{font-size:15px}.section-actions{gap:8px}.report-actions{grid-template-columns:1fr}}
+</style>
+
+<dialog id="reportDialog" class="sheet report-sheet" aria-labelledby="reportTitle">
+  <div class="sheet-handle"></div>
+  <div class="sheet-heading">
+    <div><p class="eyebrow">CONTRIBUTION REPORT</p><h2 id="reportTitle">Sharodotsav <span id="reportYear"></span></h2></div>
+    <button class="icon-button" id="closeReport" aria-label="Close report">×</button>
+  </div>
+  <div id="reportSummary" class="report-summary"></div>
+  <div class="report-table-wrap">
+    <table class="report-table">
+      <thead><tr><th>Receipt</th><th>Date</th><th>Contributor</th><th>Details</th><th>Amount</th></tr></thead>
+      <tbody id="reportRows"></tbody>
+    </table>
+  </div>
+  <div class="report-actions"><button class="primary" id="downloadReportPdfButton">⇩ Download PDF</button><button class="primary" id="downloadReportButton">⇩ Download CSV</button></div>
+</dialog>
+
+<script src="app.js?v=10"></script>
   </body>
 </html>
