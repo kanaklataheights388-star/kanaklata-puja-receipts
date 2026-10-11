@@ -1,8 +1,12 @@
 const KEY = 'kanaklata-puja-receipts-v1';
 const SETTINGS_KEY = 'kanaklata-puja-settings-v1';
+const INVITATIONS_KEY = 'kanaklata-puja-invitations-v1';
+const PRESIDENT = 'Maumita Chowdhury';
 let receipts = JSON.parse(localStorage.getItem(KEY) || '[]');
 let settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{"year":"2026","collector":"Puja Committee","secretary":"Secretary, Kanaklata Heights Residents Durga Puja Committee"}');
+let invitations = JSON.parse(localStorage.getItem(INVITATIONS_KEY) || '[]');
 let currentReceipt = null;
+let currentInvitation = null;
 let editingId = null;
 let showingAllReceipts = false;
 const $ = id => document.getElementById(id);
@@ -115,6 +119,58 @@ function downloadReportPdf(){
   link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+
+function saveInvitations(){localStorage.setItem(INVITATIONS_KEY,JSON.stringify(invitations));}
+function invitationFamilyName(name){const clean=String(name||'Guest').trim();return /\bfamily\b/i.test(clean)?clean:`${clean} & family`;}
+function contributorInvitations(){
+  const seen=new Set();
+  return receipts.filter(receipt=>{
+    const key=(receipt.name||'').trim().toLowerCase();
+    if(!key||seen.has(key))return false;
+    seen.add(key);return true;
+  }).map(receipt=>({id:`receipt-${receipt.id}`,source:'contributor',name:receipt.name,notes:receipt.notes||'',year:receipt.year||settings.year,receiptNumber:receipt.number}));
+}
+function invitationListItem(invitation,description){
+  return `<button class="invitation-list-item" data-id="${esc(invitation.id)}"><span class="initial">✦</span><span><b>${esc(invitationFamilyName(invitation.name))}</b><small>${esc(description)}</small></span><strong>›</strong></button>`;
+}
+function renderInvitations(){
+  const automatic=contributorInvitations();
+  $('invitationYear').textContent=settings.year;
+  $('contributorInvitationList').innerHTML=automatic.length?automatic.map(invitation=>invitationListItem(invitation,`Contributor · ${invitation.receiptNumber}`)).join(''):'<div class="empty">Create a receipt first. Contributor invitations will appear here automatically.</div>';
+  $('guestInvitationList').innerHTML=invitations.length?invitations.map(invitation=>invitationListItem({...invitation,source:'manual'},invitation.notes||'Guest invitation')).join(''):'<div class="empty">No extra guest invitations yet.</div>';
+  document.querySelectorAll('#contributorInvitationList .invitation-list-item').forEach(element=>element.onclick=()=>showInvitation(automatic.find(invitation=>invitation.id===element.dataset.id)));
+  document.querySelectorAll('#guestInvitationList .invitation-list-item').forEach(element=>element.onclick=()=>showInvitation({...invitations.find(invitation=>invitation.id===element.dataset.id),source:'manual'}));
+}
+function showInvitation(invitation){
+  if(!invitation)return;
+  currentInvitation=invitation;
+  const family=invitationFamilyName(invitation.name);
+  $('invitationTitle').textContent=family;
+  $('invitationCard').innerHTML=`<p class="eyebrow">SHARODOTSAV ${esc(invitation.year||settings.year)}</p><p class="invitation-bengali">শারদীয়ার আন্তরিক নিমন্ত্রণ</p><h3>A warm invitation</h3><p class="invitation-dear">Dear <b>${esc(family)}</b>,</p><p>You and your family are cordially invited to join the Durga Puja celebrations at Kanaklata Heights.</p>${invitation.notes?`<p class="invitation-note">${esc(invitation.notes)}</p>`:''}<p class="invitation-footer">Your gracious presence will make the celebration special.</p><div class="invitation-signatories"><span>President<br><b>${esc(PRESIDENT)}</b></span><span>Kanaklata Heights Residents</span></div>`;
+  $('deleteInvitationButton').hidden=invitation.source!=='manual';
+  $('invitationDetailDialog').showModal();
+}
+async function invitationImage(invitation){
+  const width=1200,height=840,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const c=canvas.getContext('2d');
+  c.fillStyle='#fff6df';c.fillRect(0,0,width,height);
+  const durga=await loadArtwork('durga-receipt-background.png');
+  if(durga)drawFadedArtwork(c,durga,665,-30,535,900,.44,'horizontal');
+  c.strokeStyle='#d69d2f';c.lineWidth=7;c.roundRect(14,14,width-28,height-28,25);c.stroke();c.strokeStyle='#fff0cb';c.lineWidth=6;c.roundRect(27,27,width-54,height-54,18);c.stroke();
+  c.fillStyle='#c98a19';c.font='22px Georgia';c.fillText('✦   ✦   ✦',60,76);c.fillStyle='#9c291e';c.font='bold 24px Georgia';c.fillText(`SHARODOTSAV ${invitation.year||settings.year}`,60,125);c.font='24px Nirmala UI, sans-serif';c.fillText('শারদীয়ার আন্তরিক নিমন্ত্রণ',60,164);c.font='italic bold 53px Georgia';c.fillText('A warm invitation',60,220);
+  c.strokeStyle='#bd8729';c.lineWidth=2;c.setLineDash([8,8]);c.beginPath();c.moveTo(60,250);c.lineTo(760,250);c.stroke();c.setLineDash([]);
+  c.fillStyle='#57483c';c.font='26px Georgia';c.fillText('Dear',60,317);c.fillStyle='#216343';c.font='italic bold 40px Georgia';let y=375;for(const line of wrap(c,invitationFamilyName(invitation.name),620)){c.fillText(line,60,y);y+=50;}
+  c.fillStyle='#57483c';c.font='25px sans-serif';y+=24;for(const line of wrap(c,'You and your family are cordially invited to join the Durga Puja celebrations at Kanaklata Heights.',630)){c.fillText(line,60,y);y+=39;}
+  if(invitation.notes){c.fillStyle='#8b1620';c.font='italic 22px Georgia';y+=14;for(const line of wrap(c,invitation.notes,620)){c.fillText(line,60,y);y+=32;}}
+  c.fillStyle='#9c291e';c.font='italic 25px Georgia';c.fillText('Your gracious presence will make the celebration special.',60,684);c.fillStyle='#57483c';c.font='20px Georgia';c.fillText('President',60,730);c.font='bold 23px Georgia';c.fillText(PRESIDENT,60,758);c.font='19px Georgia';c.fillText('Kanaklata Heights Residents · Narendrapur, Kolkata – 700103',60,792);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));return new File([blob],`puja-invitation-${invitationFamilyName(invitation.name).replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()}.png`,{type:'image/png'});
+}
+async function downloadInvitationImage(){if(!currentInvitation)return;const file=await invitationImage(currentInvitation),url=URL.createObjectURL(file),link=document.createElement('a');link.href=url;link.download=file.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+async function shareInvitation(){
+  if(!currentInvitation)return;
+  const file=await invitationImage(currentInvitation),text=`A warm invitation for ${invitationFamilyName(currentInvitation.name)} to Kanaklata Heights Sharodotsav ${currentInvitation.year||settings.year}.`;
+  if(navigator.share&&navigator.canShare?.({files:[file]})){try{await navigator.share({title:'Kanaklata Heights Puja invitation',text,files:[file]});return}catch(error){if(error.name==='AbortError')return;}}
+  await downloadInvitationImage();alert('Invitation image downloaded. Attach it in WhatsApp if the share panel did not open.');
+}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function words(n){
   const ones=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen']; const tens=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
@@ -155,3 +211,12 @@ $('closeReport').onclick=()=>$('reportDialog').close();
 $('reportDialog').addEventListener('click',event=>{if(event.target===$('reportDialog'))$('reportDialog').close();});
 $('downloadReportButton').onclick=downloadReport;
 $('downloadReportPdfButton').onclick=downloadReportPdf;
+$('invitationsButton').onclick=()=>{renderInvitations();$('invitationsDialog').showModal();};
+$('closeInvitations').onclick=()=>$('invitationsDialog').close();
+$('newGuestInvitationButton').onclick=()=>{$('guestInvitationForm').reset();$('guestInvitationDialog').showModal();};
+$('closeGuestInvitation').onclick=()=>$('guestInvitationDialog').close();
+$('guestInvitationForm').onsubmit=event=>{event.preventDefault();const data=new FormData(event.target),invitation={id:crypto.randomUUID(),name:data.get('name').trim(),notes:data.get('notes').trim(),year:settings.year,createdAt:new Date().toISOString()};invitations.unshift(invitation);saveInvitations();renderInvitations();$('guestInvitationDialog').close();showInvitation({...invitation,source:'manual'});};
+$('closeInvitationDetail').onclick=()=>$('invitationDetailDialog').close();
+$('downloadInvitationButton').onclick=downloadInvitationImage;
+$('shareInvitationButton').onclick=shareInvitation;
+$('deleteInvitationButton').onclick=()=>{if(!currentInvitation||currentInvitation.source!=='manual')return;if(!confirm(`Delete the invitation for ${currentInvitation.name}?`))return;invitations=invitations.filter(invitation=>invitation.id!==currentInvitation.id);saveInvitations();renderInvitations();$('invitationDetailDialog').close();};

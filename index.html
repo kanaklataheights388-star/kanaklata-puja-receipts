@@ -33,7 +33,7 @@
       </section>
 
       <section class="records-section">
-    <div class="section-heading"><div><p class="eyebrow">RECORDS</p><h2 id="recordsHeading">Recent receipts</h2></div><div class="section-actions"><button class="text-button" id="reportButton">Report</button><button class="text-button" id="viewAllButton" aria-expanded="false">View all</button></div></div>
+    <div class="section-heading"><div><p class="eyebrow">RECORDS</p><h2 id="recordsHeading">Recent receipts</h2></div><div class="section-actions"><button class="text-button" id="invitationsButton">Invitations</button><button class="text-button" id="reportButton">Report</button><button class="text-button" id="viewAllButton" aria-expanded="false">View all</button></div></div>
         <div id="recentReceipts" class="receipt-list"></div>
       </section>
     </main>
@@ -104,7 +104,30 @@
   .report-empty{text-align:center!important;padding:28px!important;color:#7a6454!important}
   .report-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
   .report-actions .primary{width:100%}
-  @media(max-width:520px){.report-sheet{padding:18px 14px}.report-summary{gap:6px}.report-summary article{padding:10px 8px}.report-summary strong{font-size:15px}.section-actions{gap:8px}.report-actions{grid-template-columns:1fr}}
+  .invitation-sheet{width:min(720px,calc(100% - 24px));max-height:min(760px,calc(100% - 24px));padding:22px;overflow:auto}
+  .invitation-intro{margin:0 0 16px;color:#6f5b4d;line-height:1.45}
+  .invitation-section-title{margin:20px 0 8px}
+  .invitation-list{display:grid;gap:8px}
+  .invitation-list-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;width:100%;padding:12px;border:1px solid #ead7ae;border-radius:14px;background:#fffdfa;text-align:left;color:#473a31;font:inherit}
+  .invitation-list-item:active{transform:scale(.99)}
+  .invitation-list-item .initial{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#fff1c8;color:#9c291e}
+  .invitation-list-item small{display:block;margin-top:3px;color:#7a6454}
+  .invitation-list-item strong{font-size:24px;color:#9c291e}
+  .invitation-detail-sheet{width:min(760px,calc(100% - 24px));max-height:min(800px,calc(100% - 24px));padding:20px;overflow:auto}
+  .invitation-card{min-height:430px;padding:35px 34% 28px 32px;border:3px solid #d69d2f;border-radius:22px;background:linear-gradient(90deg,rgba(255,247,225,.98) 0%,rgba(255,247,225,.94) 48%,rgba(255,247,225,.46) 100%),url('durga-receipt-background.png') right center/48% 100% no-repeat;color:#57483c}
+  .invitation-card h3{margin:8px 0 28px;color:#9c291e;font:italic bold clamp(28px,5vw,42px) Georgia,serif}
+  .invitation-card p{max-width:510px;font-size:17px;line-height:1.55}
+  .invitation-card .invitation-dear{margin:0 0 10px;font-size:19px}
+  .invitation-card .invitation-dear b{color:#216343;font-size:22px}
+  .invitation-card .invitation-bengali{margin:7px 0 0;color:#9c291e;font:18px "Nirmala UI",sans-serif;letter-spacing:.03em}
+  .invitation-card .invitation-note{font:italic 17px Georgia,serif;color:#8b1620}
+  .invitation-card .invitation-footer{margin-top:34px;color:#9c291e;font:italic 16px Georgia,serif}
+  .invitation-signatories{display:flex;justify-content:space-between;gap:12px;margin-top:18px;padding-top:12px;border-top:1px solid rgba(189,135,41,.6);font:13px Georgia,serif;color:#68584a}
+  .invitation-signatories span:last-child{text-align:right;align-self:end}
+  .invitation-signatories b{font-size:15px;color:#216343}
+  .invitation-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+  .invitation-actions .action{width:100%}
+  @media(max-width:520px){.report-sheet,.invitation-sheet,.invitation-detail-sheet{padding:18px 14px}.report-summary{gap:6px}.report-summary article{padding:10px 8px}.report-summary strong{font-size:15px}.section-actions{gap:8px}.report-actions,.invitation-actions{grid-template-columns:1fr}.invitation-card{min-height:390px;padding:28px 21% 24px 24px;background-size:auto 100%,auto 100%,cover}.invitation-card p{font-size:16px}}
 </style>
 
 <dialog id="reportDialog" class="sheet report-sheet" aria-labelledby="reportTitle">
@@ -123,6 +146,35 @@
   <div class="report-actions"><button class="primary" id="downloadReportPdfButton">⇩ Download PDF</button><button class="primary" id="downloadReportButton">⇩ Download CSV</button></div>
 </dialog>
 
-<script src="app.js?v=10"></script>
+<dialog id="invitationsDialog" class="sheet invitation-sheet" aria-labelledby="invitationsTitle">
+  <div class="sheet-handle"></div>
+  <div class="sheet-heading"><div><p class="eyebrow">SHARODOTSAV <span id="invitationYear"></span></p><h2 id="invitationsTitle">Invitation cards</h2></div><button class="close" id="closeInvitations" aria-label="Close invitations">×</button></div>
+  <p class="invitation-intro">Contributor invitations are created automatically. Add a separate invitation for any extra guest or family.</p>
+  <button class="primary large" id="newGuestInvitationButton">＋ Create guest invitation</button>
+  <p class="eyebrow invitation-section-title">CONTRIBUTORS</p>
+  <div class="invitation-list" id="contributorInvitationList"></div>
+  <p class="eyebrow invitation-section-title">EXTRA GUESTS</p>
+  <div class="invitation-list" id="guestInvitationList"></div>
+</dialog>
+
+<dialog id="guestInvitationDialog" class="sheet" aria-labelledby="guestInvitationTitle">
+  <form method="dialog" id="guestInvitationForm">
+    <div class="sheet-handle"></div>
+    <div class="sheet-heading"><div><p class="eyebrow">EXTRA GUEST</p><h2 id="guestInvitationTitle">Create invitation</h2></div><button class="close" id="closeGuestInvitation" value="cancel" aria-label="Close">×</button></div>
+    <label>Guest or family name<input required name="name" placeholder="e.g. Mr. & Mrs. Roy" autocomplete="name" /></label>
+    <label>Optional note <span class="optional">optional</span><textarea name="notes" placeholder="e.g. Special guest · Flat no. 301"></textarea></label>
+    <button class="primary large" type="submit">Create invitation</button>
+  </form>
+</dialog>
+
+<dialog id="invitationDetailDialog" class="sheet invitation-detail-sheet" aria-labelledby="invitationTitle">
+  <div class="sheet-handle"></div>
+  <div class="sheet-heading"><div><p class="eyebrow">PUJA INVITATION</p><h2 id="invitationTitle">Invitation</h2></div><button class="close" id="closeInvitationDetail" aria-label="Close invitation">×</button></div>
+  <div id="invitationCard" class="invitation-card"></div>
+  <div class="invitation-actions"><button class="action image-share" id="downloadInvitationButton">▧ Invitation image</button><button class="action" id="shareInvitationButton">↗ Share</button></div>
+  <button class="action delete" id="deleteInvitationButton">⌫ Delete guest invitation</button>
+</dialog>
+
+<script src="app.js?v=12"></script>
   </body>
 </html>
