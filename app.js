@@ -13,10 +13,18 @@ const $ = id => document.getElementById(id);
 const money = n => '₹' + Number(n).toLocaleString('en-IN');
 const dateText = iso => new Intl.DateTimeFormat('en-IN',{day:'numeric',month:'short',year:'numeric'}).format(new Date(iso));
 function save(){ localStorage.setItem(KEY, JSON.stringify(receipts)); }
+function fundTotals(){
+  return receipts.reduce((totals,receipt)=>{
+    const amount=Number(receipt.amount)||0,mode=String(receipt.paymentMode||'').trim().toUpperCase();
+    totals.total+=amount;
+    if(mode==='CASH')totals.cash+=amount;
+    if(mode==='UPI')totals.upi+=amount;
+    return totals;
+  },{cash:0,upi:0,total:0});
+}
 function renderList(){
-  const total = receipts.reduce((sum,r)=>sum+Number(r.amount),0);
-  $('totalCollected').textContent=money(total); $('receiptCount').textContent=receipts.length;
-  $('latestNumber').textContent=receipts.length ? receipts[0].number : '—';
+  const {cash,upi,total}=fundTotals();
+  $('cashCollected').textContent=money(cash); $('upiCollected').textContent=money(upi); $('totalCollected').textContent=money(total);
   const visibleReceipts=showingAllReceipts ? receipts : receipts.slice(0,5);
   $('recordsHeading').textContent=showingAllReceipts ? 'All receipts' : 'Recent receipts';
   $('viewAllButton').hidden=receipts.length<=5;
@@ -28,10 +36,9 @@ function renderList(){
 
 function renderReport(){
   const ordered=[...receipts].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const total=ordered.reduce((sum,r)=>sum+Number(r.amount||0),0);
-  const contributors=new Set(ordered.map(r=>(r.name||'').trim().toLowerCase()).filter(Boolean)).size;
+  const {cash,upi,total}=fundTotals();
   $('reportYear').textContent=settings.year;
-  $('reportSummary').innerHTML=`<article><span>Total collected</span><strong>${money(total)}</strong></article><article><span>Receipts</span><strong>${ordered.length}</strong></article><article><span>Contributors</span><strong>${contributors}</strong></article>`;
+  $('reportSummary').innerHTML=`<article><span>Cash collected</span><strong>${money(cash)}</strong></article><article><span>UPI collected</span><strong>${money(upi)}</strong></article><article><span>Total fund</span><strong>${money(total)}</strong></article>`;
   $('reportRows').innerHTML=ordered.length ? ordered.map(r=>`<tr><td>${esc(r.number)}</td><td>${dateText(r.date)}</td><td><b>${esc(r.name)}</b></td><td>${esc(r.purpose)}<small>${esc(r.paymentMode)}${r.notes ? ` · ${esc(r.notes)}` : ''}</small></td><td>${money(r.amount)}</td></tr>`).join('') : '<tr><td colspan="5" class="report-empty">No receipt records have been saved yet.</td></tr>';
 }
 
