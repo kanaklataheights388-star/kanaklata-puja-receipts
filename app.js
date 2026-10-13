@@ -128,7 +128,7 @@ function contributorInvitations(){
     const key=(receipt.name||'').trim().toLowerCase();
     if(!key||seen.has(key))return false;
     seen.add(key);return true;
-  }).map(receipt=>({id:`receipt-${receipt.id}`,source:'contributor',name:receipt.name,notes:receipt.notes||'',year:receipt.year||settings.year,receiptNumber:receipt.number}));
+  }).map(receipt=>({id:`receipt-${receipt.id}`,source:'contributor',name:receipt.name,notes:'',year:receipt.year||settings.year,receiptNumber:receipt.number}));
 }
 function invitationListItem(invitation,description){
   return `<button class="invitation-list-item" data-id="${esc(invitation.id)}"><span class="initial">✦</span><span><b>${esc(invitationFamilyName(invitation.name))}</b><small>${esc(description)}</small></span><strong>›</strong></button>`;
@@ -153,8 +153,9 @@ function showInvitation(invitation){
 async function invitationImage(invitation){
   const width=1200,height=840,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const c=canvas.getContext('2d');
   c.fillStyle='#fff6df';c.fillRect(0,0,width,height);
-  const durga=await loadArtwork('durga-receipt-background.png');
-  if(durga)drawFadedArtwork(c,durga,665,-30,535,900,.44,'horizontal');
+  const [durga,ornament]=await Promise.all([loadArtwork('durga-receipt-background.png'),loadArtwork('durga-puja-ornament.png')]);
+  if(durga)drawFadedArtwork(c,durga,525,-15,640,895,.4,'horizontal');
+  if(ornament){c.save();c.globalAlpha=.28;c.drawImage(ornament,45,500,390,224);c.restore();}
   c.strokeStyle='#d69d2f';c.lineWidth=7;c.roundRect(14,14,width-28,height-28,25);c.stroke();c.strokeStyle='#fff0cb';c.lineWidth=6;c.roundRect(27,27,width-54,height-54,18);c.stroke();
   c.fillStyle='#c98a19';c.font='22px Georgia';c.fillText('✦   ✦   ✦',60,76);c.fillStyle='#9c291e';c.font='bold 24px Georgia';c.fillText(`SHARODOTSAV ${invitation.year||settings.year}`,60,125);c.font='24px Nirmala UI, sans-serif';c.fillText('শারদীয়ার আন্তরিক নিমন্ত্রণ',60,164);c.font='italic bold 53px Georgia';c.fillText('A warm invitation',60,220);
   c.strokeStyle='#bd8729';c.lineWidth=2;c.setLineDash([8,8]);c.beginPath();c.moveTo(60,250);c.lineTo(760,250);c.stroke();c.setLineDash([]);

@@ -114,7 +114,9 @@
   .invitation-list-item small{display:block;margin-top:3px;color:#7a6454}
   .invitation-list-item strong{font-size:24px;color:#9c291e}
   .invitation-detail-sheet{width:min(760px,calc(100% - 24px));max-height:min(800px,calc(100% - 24px));padding:20px;overflow:auto}
-  .invitation-card{min-height:430px;padding:35px 34% 28px 32px;border:3px solid #d69d2f;border-radius:22px;background:linear-gradient(90deg,rgba(255,247,225,.98) 0%,rgba(255,247,225,.94) 48%,rgba(255,247,225,.46) 100%),url('durga-receipt-background.png') right center/48% 100% no-repeat;color:#57483c}
+  .invitation-card{position:relative;isolation:isolate;overflow:hidden;min-height:430px;padding:35px 34% 28px 32px;border:3px solid #d69d2f;border-radius:22px;background:linear-gradient(90deg,rgba(255,247,225,.98) 0%,rgba(255,247,225,.94) 48%,rgba(255,247,225,.46) 100%) center/100% 100% no-repeat,url('durga-receipt-background.png') calc(100% - 32px) center/54% 100% no-repeat;color:#57483c}
+  .invitation-card::before{content:"";position:absolute;z-index:0;left:28px;bottom:14px;width:50%;height:34%;background:url('durga-puja-ornament.png') left bottom/contain no-repeat;opacity:.3;pointer-events:none}
+  .invitation-card>*{position:relative;z-index:1}
   .invitation-card h3{margin:8px 0 28px;color:#9c291e;font:italic bold clamp(28px,5vw,42px) Georgia,serif}
   .invitation-card p{max-width:510px;font-size:17px;line-height:1.55}
   .invitation-card .invitation-dear{margin:0 0 10px;font-size:19px}
@@ -127,7 +129,7 @@
   .invitation-signatories b{font-size:15px;color:#216343}
   .invitation-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
   .invitation-actions .action{width:100%}
-  @media(max-width:520px){.report-sheet,.invitation-sheet,.invitation-detail-sheet{padding:18px 14px}.report-summary{gap:6px}.report-summary article{padding:10px 8px}.report-summary strong{font-size:15px}.section-actions{gap:8px}.report-actions,.invitation-actions{grid-template-columns:1fr}.invitation-card{min-height:390px;padding:28px 21% 24px 24px;background-size:auto 100%,auto 100%,cover}.invitation-card p{font-size:16px}}
+  @media(max-width:520px){.report-sheet,.invitation-sheet,.invitation-detail-sheet{padding:18px 14px}.report-summary{gap:6px}.report-summary article{padding:10px 8px}.report-summary strong{font-size:15px}.section-actions{gap:8px}.report-actions,.invitation-actions{grid-template-columns:1fr}.invitation-card{min-height:390px;padding:28px 21% 24px 24px;background-position:center,calc(100% - 16px) center;background-size:100% 100%,58% 100%}.invitation-card::before{left:18px;width:56%;opacity:.25}.invitation-card p{font-size:16px}}
 </style>
 
 <dialog id="reportDialog" class="sheet report-sheet" aria-labelledby="reportTitle">
@@ -175,6 +177,6 @@
   <button class="action delete" id="deleteInvitationButton">⌫ Delete guest invitation</button>
 </dialog>
 
-<script src="app.js?v=12"></script>
+<script src="app.js?v=13"></script>
   </body>
 </html>
